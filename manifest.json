@@ -1,0 +1,16 @@
+{
+    "manifest_version": 2,
+    "name": "Twitter Idle AutoRefresh",
+    "version": "1.0.1",
+    "description": "Automatically loads new tweets as they appear on the Twitter home feed, so long as the page isn't focused.",
+    "icons": {
+        "48": "icons/twitter-idle-autorefresh-48.png",
+        "96": "icons/twitter-idle-autorefresh-96.png"
+    },
+    "content_scripts": [
+        {
+            "matches": ["*://twitter.com/*"],
+            "js": ["twitter-idle-autorefresh.js"]
+        }
+    ]
+}
