@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <style type="text/css">
+        .twitter-idle-autorefresh .updatefrequency-field {
+            width: 80px;
+            margin: 0 10px;
+        }
+
+        .twitter-idle-autorefresh .main-fieldset {
+            box-shadow: 1px 1px 8px #ccc;
+            border: 1px solid #ddd;
+            padding: 20px;
+        }
+
+        .twitter-idle-autorefresh .main-fieldset > legend {
+            background-color: #fff;
+            margin-left: -15px;
+            font-weight: bold;
+            padding: 0 15px;
+        }
+
+        .twitter-idle-autorefresh .sub-fieldset {
+            border: 1px solid #ccc;
+        }
+
+        .twitter-idle-autorefresh .sub-fieldset > legend {
+            background-color: #fff;
+            font-weight: bold;
+            margin-left: -8px;
+            padding: 0 10px;
+        }
+
+        .twitter-idle-autorefresh blockquote {
+            background-color: #e1f5fa;
+            border-radius: 3px;
+            line-height: 1.5;
+            color: #364144;
+            font-size: 12px;
+            margin: 20px 0;
+            padding: 15px;
+        }
+
+        .twitter-idle-autorefresh blockquote h3 {
+            margin: 0 0 5px;
+        }
+
+        .twitter-idle-autorefresh blockquote code {
+            background-color: rgba(255, 255, 255, .5);
+            border-radius: 3px;
+            padding: 2px 4px;
+            margin: 0 2px;
+            color: red;
+        }
+
+        .twitter-idle-autorefresh blockquote a {
+            font-weight: bold;
+            color: #364144;
+        }
+    </style>
+</head>
+<body>
+    
+    <form class="twitter-idle-autorefresh">
+        <fieldset class="browser-style main-fieldset">
+            <legend class="browser-style">Add-On Settings</legend>
+
+            <div class="browser-style">
+                Look for new tweets every
+                <input type="number" min="10" id="setting-updatefrequency" class="updatefrequency-field">
+                seconds
+            </div>
+
+            <br>
+
+            <fieldset class="browser-style sub-fieldset">
+                <legend class="browser-style">Indicate add-on state by...</legend>
+
+                <div>
+                    <label class="browser-style">
+                        <input type="checkbox" id="indicate-by-logo"> Twitter Logo
+                    </label>
+                </div>
+            </fieldset>
+
+            <br>
+
+            <fieldset class="browser-style sub-fieldset">
+                <legend class="browser-style">Pause the add-on on...</legend>
+
+                <div>
+                    <label class="browser-style">
+                        <input type="checkbox" id="pause-on-focus"> Page Focus
+                    </label>
+                </div>
+
+                <div>
+                    <label class="browser-style">
+                        <input type="checkbox" id="pause-on-feedscrolled"> Scrolled Feed
+                    </label>
+                </div>
+
+                <div>
+                    <label class="browser-style">
+                        <input type="checkbox" id="pause-on-popups"> Popups
+                    </label>
+                </div>
+
+                <div>
+                    <label class="browser-style">
+                        <input type="checkbox" id="pause-on-inputfocus"> Input Focus
+                    </label>
+                </div>
+
+                <div>
+                    <label class="browser-style">
+                        <input type="checkbox" id="pause-on-homefeed"> Home Feed
+                    </label>
+                </div>
+
+                <div>
+                    <label class="browser-style">
+                        <input type="checkbox" id="pause-on-profilefeeds"> Profile Feeds
+                    </label>
+                </div>
+            </fieldset>
+
+            <blockquote>
+                <h3>Please read!</h3>
+
+                <p>
+                    As a privacy proponent myself, I would like to briefly state that the add-on will <strong>NEVER</strong> record any data whatsoever (e.g. browsing habits). It does however require the <code>storage</code> permission in order to save &amp; read the above user settings. It will also only activate on URLs matching <code>*://twitter.com/*</code>.
+                </p>
+
+                <p>
+                    The add-on is freely available on <a href="https://github.com/anomalyce/twitter-idle-autorefresh">GitHub</a> for full transparency.
+                </p>
+            </blockquote>
+
+            <button type="submit">Save</button>
+        </fieldset>
+    </form>
+
+    <script src="options.js"></script>
+
+</body>
+</html>

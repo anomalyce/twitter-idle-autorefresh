@@ -30,6 +30,15 @@
                     AddOn.watch()
                 }
             }, 100);
+
+            let getting = browser.storage.sync.get(null)
+            getting.then((item) => {
+                console.log('ITEMZ', item)
+
+                document.querySelector('body').style.border = '10px solid ' + color
+            }, (error) => {
+                console.log('Error: ' + error)
+            })
         }
 
         /**

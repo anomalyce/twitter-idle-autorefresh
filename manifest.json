@@ -12,5 +12,15 @@
             "matches": ["*://twitter.com/*"],
             "js": ["twitter-idle-autorefresh.js"]
         }
-    ]
+    ],
+    "options_ui": {
+        "page": "settings/options.html",
+        "browser_style": true
+    },
+    "permissions": ["storage"],
+    "applications": {
+        "gecko": {
+            "id": "twitter-idle-autorefresh@anomalyce.dev"
+        }
+    }
 }
