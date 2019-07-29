@@ -1,13 +1,14 @@
 # Twitter Idle AutoRefresh
 
-A Mozilla Firefox add-on that automatically reveals unread tweets every 15 seconds on the Twitter home feed, so long as the page isn't focused and is scrolled to the top of the page.
+A Mozilla Firefox add-on that automatically reveals unread tweets every set seconds on Twitter feeds, so long as the customisable conditions are met. The primary goal of this add-on is to allow you to continiously read Twitter whilst doing other things on the side (e.g. work).
 
-The primary goal of the add-on is to allow a continuous Twitter feed whilst you work or do other stuff on the side. The add-on will activate so long as you meet the following criteria:
+You may find a handful of options (including but not limited to the customisable conditions for the auto-refreshing procedure) through the Mozilla Firefox add-on's page (`about:addons`).
 
-+ The page isn't focused
-+ The page is scrolled to the very top of the page
-+ The page is on the Twitter home feed
+PS. The add-on will only work with the new Twitter design, as per July 2019.
+PSS. Should you change the Twitter design in their Display settings, it is recommended that you refresh the page to re-initialise the add-on.
 
-You can easily indicate whether the add-on is enabled by the Twitter logo at the very top left. If it's the blue default Twitter bird, then it's disabled. If it's the black Twitter bird with a refresh symbol within it (same as the add-on here on AMO), then the add-on is enabled.
-
-_Disclaimer! Only tested with the new Twitter design, as per July, 2019._
+> Please read!
+>
+> As a privacy proponent myself, I would like to briefly state that this add-on will **NEVER** record any data whatsoever (e.g. browsing habits). It does however require the `storage` permission in order to save &amp; read its user settings. It will also only activate on URLs matching `*://twitter.com/*`.
+>
+> The add-on is freely available on [GitHub](https://github.com/anomalyce/twitter-idle-autorefresh) for full transparency.

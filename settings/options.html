@@ -33,6 +33,26 @@
             padding: 0 10px;
         }
 
+        .twitter-idle-autorefresh .sub-fieldset .indent {
+            margin: 0 10px 5px;
+        }
+
+        .twitter-idle-autorefresh .sub-fieldset h3 {
+            font-size: inherit;
+            margin: 10px 0;
+        }
+
+        .twitter-idle-autorefresh .sub-fieldset select.browser-style {
+            margin-right: 6px;
+            margin-left: 6px;
+        }
+
+        .twitter-idle-autorefresh .sub-fieldset .browser-style.disabled {
+            -webkit-filter: grayscale(100%);
+            filter: grayscale(100%);
+            opacity: .5;
+        }
+
         .twitter-idle-autorefresh blockquote {
             background-color: #e1f5fa;
             border-radius: 3px;
@@ -43,7 +63,7 @@
             padding: 15px;
         }
 
-        .twitter-idle-autorefresh blockquote h3 {
+        .twitter-idle-autorefresh blockquote h4 {
             margin: 0 0 5px;
         }
 
@@ -59,79 +79,133 @@
             font-weight: bold;
             color: #364144;
         }
+
+        .twitter-idle-autorefresh .description {
+            font-style: italic;
+            font-size: 10px;
+            margin: 3px 0;
+            color: #999;
+        }
+
+        .twitter-idle-autorefresh fieldset legend + .description {
+            margin: -5px 0 15px;
+        }
     </style>
 </head>
 <body>
     
     <form class="twitter-idle-autorefresh">
         <fieldset class="browser-style main-fieldset">
-            <legend class="browser-style">Add-On Settings</legend>
-
-            <div class="browser-style">
-                Look for new tweets every
-                <input type="number" min="10" id="setting-updatefrequency" class="updatefrequency-field">
-                seconds
-            </div>
-
-            <br>
+            <legend class="browser-style">Twitter Idle AutoRefresh Settings</legend>
 
             <fieldset class="browser-style sub-fieldset">
-                <legend class="browser-style">Indicate add-on state by...</legend>
+                <legend class="browser-style">General Settings</legend>
+
+                <div class="browser-style">
+                    Look for new tweets every
+                    <input type="number" min="5" id="setting-updatefrequency" class="updatefrequency-field">
+                    seconds
+
+                    <p class="description">
+                        Twitter's API rate limit is at 180 requests per 15 minutes (12 requests per minute, or every 5th second). It is recommended to not go below 10 seconds as to provide yourself with a bit of a margin.
+                    </p>
+                </div>
+
+                <br>
 
                 <div>
                     <label class="browser-style">
-                        <input type="checkbox" id="indicate-by-logo"> Twitter Logo
+                        <input type="checkbox" id="setting-logoindicator">
+                        Indicate status through logo
                     </label>
+
+                    <p class="description">
+                        Whenever the auto-refreshing procedure is enabled, the Twitter logo will be replaced with the Twitter Idle AutoRefresh logo to provide a visual cue.
+                    </p>
                 </div>
             </fieldset>
 
             <br>
 
             <fieldset class="browser-style sub-fieldset">
-                <legend class="browser-style">Pause the add-on on...</legend>
+                <legend class="browser-style">Auto-Refreshing</legend>
 
-                <div>
-                    <label class="browser-style">
-                        <input type="checkbox" id="pause-on-focus"> Page Focus
-                    </label>
+                <p class="description">
+                    These conditions decide when &amp; where the auto-refreshing procedure should be enabled.
+                </p>
+
+                <h3>Channels</h3>
+
+                <div class="indent">
+                    <div>
+                        <label class="browser-style">
+                            <input type="checkbox" id="refresh-channel-home">
+                            Home feed
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="browser-style disabled">
+                            <input disabled="disabled" type="checkbox" id="refresh-channel-profile">
+                            User profiles <em>(Coming soon)</em>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label class="browser-style disabled">
+                            <input disabled="disabled" type="checkbox" id="refresh-channel-search">
+                            Search results <em>(Coming soon)</em>
+                        </label>
+                    </div>
                 </div>
+                
+                <h3>Conditions</h3>
 
-                <div>
-                    <label class="browser-style">
-                        <input type="checkbox" id="pause-on-feedscrolled"> Scrolled Feed
-                    </label>
+                <div class="indent">
+                    <div>
+                        Enable when the page is
+                        <select id="refresh-condition-focus" class="browser-style">
+                            <option value="focused">focused</option>
+                            <option value="unfocused">unfocused</option>
+                            <option value="both">focused or unfocused</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        Enable when the scrollbar is
+                        <select id="refresh-condition-scrollbar" class="browser-style">
+                            <option value="top">at the top of the page</option>
+                            <option value="anywhere">anywhere</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="browser-style">
+                            <input type="checkbox" id="refresh-user-mousemovement">
+                            Disable when the user moves the mouse over the window
+                        </label>
+                    </div>
                 </div>
+            </fieldset>
+
+            <br>
+
+            <fieldset class="browser-style sub-fieldset">
+                <legend class="browser-style">Debugging</legend>
 
                 <div>
                     <label class="browser-style">
-                        <input type="checkbox" id="pause-on-popups"> Popups
-                    </label>
-                </div>
-
-                <div>
-                    <label class="browser-style">
-                        <input type="checkbox" id="pause-on-inputfocus"> Input Focus
-                    </label>
-                </div>
-
-                <div>
-                    <label class="browser-style">
-                        <input type="checkbox" id="pause-on-homefeed"> Home Feed
-                    </label>
-                </div>
-
-                <div>
-                    <label class="browser-style">
-                        <input type="checkbox" id="pause-on-profilefeeds"> Profile Feeds
+                        <input type="checkbox" id="setting-debuglogs">
+                        Output console logs
                     </label>
                 </div>
             </fieldset>
 
             <blockquote>
-                <h3>Please read!</h3>
+                <h4>Please read!</h4>
 
                 <p>
-                    As a privacy proponent myself, I would like to briefly state that the add-on will <strong>NEVER</strong> record any data whatsoever (e.g. browsing habits). It does however require the <code>storage</code> permission in order to save &amp; read the above user settings. It will also only activate on URLs matching <code>*://twitter.com/*</code>.
+                    As a privacy proponent myself, I would like to briefly state that this add-on will <strong>NEVER</strong> record any data whatsoever (e.g. browsing habits). It does however require the <code>storage</code> permission in order to save &amp; read the above user settings. It will also only activate on URLs matching <code>*://twitter.com/*</code>.
                 </p>
 
                 <p>
