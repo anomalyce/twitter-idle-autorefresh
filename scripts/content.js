@@ -1,4 +1,4 @@
-(function() {
+(() => {
     class TwitterIdleAutoRefresh {
         get Manifest() { return browser.runtime.getManifest() }
         get FeedSelector() { return 'main [data-testid=primaryColumn] section[role=region]' }
@@ -27,7 +27,12 @@
         constructor() {
             let addon = this
 
-            this.pause()
+            this.paused = null
+            this.oldState = null
+            this.pauseTicks = null
+            this.refreshing = false
+            this.oldSceneryState = null
+            this.scenery = this.resetScenery()
 
             this.twitterHasLoaded()
                 .then((data) => {
@@ -37,6 +42,7 @@
                         addon.options = addon.getOptions(options)
 
                         addon.createIndicator()
+                        window.addEventListener('mousemove', (e) => { addon.monitorMouseMovement(addon, e) })
                         addon.log('Twitter has finished loading the initial feed.')
 
                         new TweetWatcher(addon)
@@ -85,21 +91,147 @@
         }
 
         /**
-         * Pause the addon.
+         * Pause the add-on temporarily when we detect mouse movement.
+         *
+         * @param  \TwitterIdleAutoRefresh  addon
+         * @param  object  e
+         * @return void
+         */
+        monitorMouseMovement(addon, e) {
+            if (this.options.refreshConditionMouseMovement) {
+                addon.forcePauseFor(5, `Mouse movement detected, pausing for 5 ticks...`)
+            }
+        }
+
+        /**
+         * Reset the scenery.
          *
          * @return void
          */
-        pause() {
+        resetScenery() {
+            this.oldSceneryState = this.scenery
+            this.scenery = { channel: null, conditions: [] }
+        }
+
+        /**
+         * Set the scenery channel.
+         *
+         * @param  string  channel
+         * @return void
+         */
+        setSceneryChannel(channel) {
+            this.scenery.channel = channel
+        }
+
+        /**
+         * Add a scenery condition.
+         *
+         * @param  string  condition
+         * @return void
+         */
+        addSceneryCondition(condition) {
+            this.scenery.conditions.push(condition)
+        }
+
+        /**
+         * Retrieve the current scenery channel.
+         *
+         * @return string
+         */
+        getSceneryChannel() {
+            return this.scenery.channel
+        }
+
+        /**
+         * Retrieve the current scenery conditions.
+         *
+         * @return array
+         */
+        getSceneryConditions() {
+            return this.scenery.conditions
+        }
+
+        /**
+         * Determine whether the add-on's state has changed.
+         *
+         * @return boolean
+         */
+        stateHasChanged() {
+            return this.sceneryHasChanged()
+                || (this.oldState !== this.paused)
+        }
+
+        /**
+         * Determine whether the add-on's scenery has changed.
+         *
+         * @return boolean
+         */
+        sceneryHasChanged() {
+            return (this.oldSceneryState.channel !== this.scenery.channel)
+                || (this.oldSceneryState.conditions.length !== this.scenery.conditions.length)
+        }
+
+        /**
+         * Set or get the refreshing status.
+         *
+         * @param  boolean  update  null
+         * @return boolean|void
+         */
+        isRefreshing(update = null) {
+            if (update === true) {
+                this.refreshing = true
+                return
+            }
+
+            if (update === false) {
+                this.refreshing = false
+                return
+            }
+
+            return this.refreshing
+        }
+
+        /**
+         * Force pause the addon for a set amount of ticks.
+         *
+         * @param  integer  ticks
+         * @param  string  reason  false
+         * @return void
+         */
+        forcePauseFor(ticks, reason = false) {
+            this.pauseTicks = ticks
+
+            this.pause(reason)
+        }
+
+        /**
+         * Pause the addon.
+         *
+         * @param  string|boolean  reason  false
+         * @return void
+         */
+        pause(reason = false) {
+            this.oldState = this.paused
             this.paused = true
+
+            if (reason && this.stateHasChanged()) {
+                this.log(reason)
+            }
         }
 
         /**
          * Resume the addon.
          *
+         * @param  string|boolean  reason  false
          * @return void
          */
-        resume() {
+        resume(reason = false) {
+            this.oldState = this.paused
             this.paused = false
+
+            if (reason && this.stateHasChanged()) {
+                this.log(reason)
+            }
         }
 
         /**
@@ -112,6 +244,9 @@
         }
 
         /**
+         * Create the add-on's status logo.
+         *
+         * @return void
          */
         createIndicator() {
             this.twitterLogo = document.querySelector(this.StatusSelector).parentNode
@@ -132,6 +267,9 @@
         }
 
         /**
+         * Toggle between the add-on's status logo & the original Twitter logo.
+         *
+         * @return void
          */
         indicateStatus() {
             if (this.isPaused() || ! this.options.settingLogoIndicator) {
@@ -186,6 +324,19 @@
     }
 
     class TweetWatcher {
+        get Channels() {
+            return [
+                new ChannelHome /*, new ChannelProfile, new ChannelSearch, */
+            ]
+        }
+
+        get Conditions() {
+            return [
+                [ new ConditionFocused, new ConditionUnfocused ],
+                [ new ConditionScrollbarTop, new ConditionScrollbarAnywhere ],
+            ]
+        }
+
         /**
          * Initialise the tweet watcher.
          *
@@ -198,26 +349,50 @@
             this.tick = 0
             this.tickrate = 0.5 // 1 tick per 500ms (= 2 ticks per second)
             this.detector = null
-            this.refreshing = false
-            this.userInteraction = 0
-            this.scenery = { conditions: [ ], channel: false }
 
-            let channels = [
-                new ChannelHome(this.addon),
-                // new ChannelProfile(this.addon),
-                // new ChannelSearch(this.addon),
-            ]
+            const channels = this.initialiseEntities(this.Channels)
+            const conditions = this.initialiseEntities(this.Conditions)
 
-            this.watch(channels, [
-                [
-                    new ConditionFocused(this.addon),
-                    new ConditionUnfocused(this.addon),
-                ],
-                [
-                    new ConditionScrollbarTop(this.addon),
-                    new ConditionScrollbarAnywhere(this.addon),
-                ],
-            ])
+            let watcher = this
+            window.addEventListener('scroll', (e) => {
+                let position = (window.pageYOffset || document.documentElement.scrollTop)
+
+                if (watcher.addon.isRefreshing() && position !== 0) {
+                    scrollTo(0, 0)
+                    setTimeout(() => { scrollTo(0, 0) }, 200)
+                    setTimeout(() => {
+                        scrollTo(0, 0)
+                        watcher.addon.isRefreshing(false)
+                    }, 500)
+                }
+            })
+
+            this.watch(channels, conditions)
+        }
+
+        /**
+         * Initialise entities by properly setting them up.
+         *
+         * @param  array  conditions
+         * @return array
+         */
+        initialiseEntities(conditions) {
+            let result = []
+
+            for (let i in conditions) {
+                if (Array.isArray(conditions[i])) {
+                    result.push(this.initialiseEntities(conditions[i]))
+                    continue
+                }
+
+                let object = conditions[i]
+                
+                object.setup(this.addon)
+                
+                result.push(object)
+            }
+
+            return result
         }
 
         /**
@@ -230,51 +405,21 @@
         watch(channels, conditions) {
             this.addon.log(`Tweet watcher running at a tick rate of 1 per ${this.tickrate * 1000}ms.`)
 
-            document.addEventListener('mousemove', (e) => {
-                if (! this.addon.options.refreshConditionMouseMovement || this.addon.isPaused()) {
-                    return
-                }
-
-                let penalty = 10
-                if (this.userInteraction === 0) {
-                    this.addon.log(`Auto-refreshing disabled via user interaction penalty for ${penalty} ticks...`)
-                }
-
-                this.userInteraction = penalty
-                this.addon.pause()
-            })
-
             this.detector = setInterval(() => {
-                this.addon.indicateStatus()
+                if (this.addon.pauseTicks > 0) {
+                    this.addon.pauseTicks--
 
-                // Exit out early of the loop if it's in the middle of a refresh
-                if (this.refreshing) {
-                    return
+                    return this.addon.indicateStatus()
+                } else if (this.addon.pauseTicks === 0) {
+                    this.addon.pauseTicks = null
+                    this.addon.resume('Resumed from being force paused...')
                 }
 
-                this.addon.pause()
-
-                // Check the current conditions
-                if (this.setupScenery(channels, conditions)) {
-                    this.addon.resume()
-
-                    // Handle user interaction penalties
-                    if (this.addon.options.refreshConditionMouseMovement) {
-                        if (this.userInteraction > 0) {
-                            this.userInteraction--
-
-                            if (this.userInteraction === 0) {
-                                this.addon.log(`Auto-refreshing re-enabled via expiration of user interaction penalty.`)
-                            } else {
-                                return
-                            }
-                        }
-                    }
-                }
+                this.setupScenery(channels, conditions)
 
                 // Exit out early if the addon hasn't been resumed by any conditions
                 if (this.addon.isPaused()) {
-                    return
+                    return this.addon.indicateStatus()
                 }
 
                 this.tick++
@@ -283,6 +428,8 @@
                 if (this.shouldRefreshFeed()) {
                     this.refreshFeed()
                 }
+
+                this.addon.indicateStatus()
             }, (this.tickrate * 1000))
         }
 
@@ -291,82 +438,106 @@
          *
          * @param  array  channels
          * @param  array  conditions
-         * @return boolean
+         * @return void
          */
         setupScenery(channels, conditions) {
-            let channel = this.match(channels)
-            let matches = this.nestedMatch(conditions)
-
-            if (this.sceneryChanged(channel, matches)) {
-                if (channel && matches.length > 0) {
-                    this.addon.log(`Auto-refreshing enabled using [${matches.join(', ')}] via ${channel}.`)
-                } else {
-                    this.addon.log(`Auto-refreshing disabled.`)
-                }
-
-                this.scenery.channel = channel
-                this.scenery.conditions = matches
+            if (this.addon.isRefreshing()) {
+                return
             }
 
-            return channel && matches.length > 0
+            this.addon.resetScenery()
+
+            if (! this.sceneryDetectsChannel(channels)) {
+                return this.addon.pause(`Invalid channel, expecting one of ${this.formatEntities(channels)}.`)
+            }
+
+            let criteria = this.sceneryMeetsCriteria(conditions)
+            if (criteria.rejected.length > 0) {
+                return this.addon.pause(`Unmet criteria: ${this.formatEntities(criteria.rejected)}.`)
+            }
+
+            this.addon.resume(
+                `'${this.addon.getSceneryChannel()}' via ${this.formatEntities(criteria.accepted)}.`
+            )
         }
 
         /**
-         * Check if the add-on scenery has changed since the last tick.
+         * Format entities in a more presentable manner.
          *
-         * @param  string  channel
-         * @param  array  conditions
-         * @return boolean
+         * @param  array  entities
+         * @return string
          */
-        sceneryChanged(channel, conditions) {
-            let conditionsEqual = conditions.length === this.scenery.conditions.length && conditions.every((value, index) => {
-                return value === this.scenery.conditions[index]
-            })
-
-            return channel !== this.scenery.channel
-                || ! conditionsEqual
-        }
-
-        /**
-         * Match against any of the given conditions.
-         *
-         * @param  array  conditions
-         * @return string|boolean
-         */
-        match(conditions) {
-            for (let i in conditions) {
-                if (! (conditions[i] instanceof Condition) || ! conditions[i].match()) {
-                    continue
+        formatEntities(entities) {
+            return entities.map((entity) => {
+                if (Array.isArray(entity)) {
+                    return this.formatEntities(entity)
                 }
 
-                return conditions[i].constructor.name
+                if (entity instanceof Condition) {
+                    return `'${entity.constructor.name}'`
+                }
+
+                return `'${entity}'`
+            }).join(', ')
+        }
+
+        /**
+         * Check if the scenery can detect a viable channel.
+         *
+         * @param  array  channels
+         * @return boolean
+         */
+        sceneryDetectsChannel(channels) {
+            for (let i in channels) {
+                let channel = channels[i]
+
+                if (channel.enabled() && channel.match()) {
+                    this.addon.setSceneryChannel(channel.constructor.name)
+                    return true
+                }
             }
 
             return false
         }
 
         /**
-         * Match against at least one condition from each of the given groups.
+         * Check if the scenery meets at least one enabled condition from each group.
          *
-         * @param  array  conditions
+         * @param  array  conditionGroups
          * @return array
          */
-        nestedMatch(conditions) {
-            let matches = []
+        sceneryMeetsCriteria(conditionGroups) {
+            let collection = {
+                accepted: [],
+                rejected: []
+            }
 
-            for (let i in conditions) {
-                let condition = this.match(conditions[i])
+            for (let group in conditionGroups) {
+                let accepted = []
+                let rejected = []
 
-                if (condition) {
-                    matches.push(condition)
+                for (let i in conditionGroups[group]) {
+                    let condition = conditionGroups[group][i]
+
+                    if (! condition.enabled()) {
+                        continue
+                    }
+
+                    let name = condition.constructor.name
+
+                    if (condition.match()) {
+                        this.addon.addSceneryCondition(name)
+                        accepted.push(name)
+                    } else {
+                        rejected.push(name)
+                    }
                 }
+
+                collection.accepted = collection.accepted.concat(accepted)
+                collection.rejected = collection.rejected.concat(rejected)
             }
 
-            if (matches.length !== conditions.length) {
-                return []
-            }
-
-            return matches
+            return collection
         }
 
         /**
@@ -375,6 +546,7 @@
          * @return boolean
          */
         shouldRefreshFeed() {
+
             let frequency = this.addon.options.settingUpdatefrequency
 
             return this.tick % (frequency * (1 / this.tickrate)) === 0
@@ -386,39 +558,32 @@
          * @return void
          */
         refreshFeed() {
-            this.refreshing = true
+            this.addon.isRefreshing(true)
 
             document.querySelector(this.addon.RefreshSelector).click()
 
             this.addon.log(`Refreshing at tick ${this.tick}.`)
-
-            const scrolling = (e) => {
-                scrollTo(0, 0)
-                this.refreshing = false
-            }
-
-            setTimeout(scrolling, 800)
-            setTimeout(scrolling, 1000)
-            setTimeout(scrolling, 1200)
         }
     }
 
     class Condition {
-        constructor(addon) {
+        constructor() {
             if (this.constructor === Condition) {
                 throw new TypeError('Abstract class "Condition" cannot be instantiated directly.'); 
             }
+        }
 
+        setup(addon) {
             this.addon = addon
         }
     }
 
     class ChannelHome extends Condition {
-        match () {
-            if (! this.addon.options.refreshChannelHome) {
-                return false
-            }
+        enabled() {
+            return this.addon.options.refreshChannelHome
+        }
 
+        match() {
             let path = window.location.pathname
 
             return path.match(/^\/home/)
@@ -426,57 +591,68 @@
     }
 
     class ChannelProfile extends Condition {
-        match () {
-            if (! this.addon.options.refreshChannelProfile) {
-                return false
-            }
+        enabled() {
+            return this.addon.options.refreshChannelProfile
+        }
 
+        match() {
             return document.title.match(/\(\@(.+)\)/)
         }
     }
 
     class ChannelSearch extends Condition {
-        match () {
-            if (! this.addon.options.refreshChannelSearch) {
-                return false
-            }
+        enabled() {
+            return this.addon.options.refreshChannelSearch
+        }
 
+        match() {
             return document.title.match(/Twitter Search/i)
         }
     }
 
     class ConditionFocused extends Condition {
-        match () {
+        enabled() {
             let condition = this.addon.options.refreshConditionFocus.toLowerCase()
 
+            return (condition === 'focused' || condition === 'both')
+        }
+
+        match() {
             return document.hasFocus()
-                && (condition === 'focused' || condition === 'both')
         }
     }
 
     class ConditionUnfocused extends Condition {
-        match () {
+        enabled() {
             let condition = this.addon.options.refreshConditionFocus.toLowerCase()
 
+            return (condition === 'unfocused' || condition === 'both')
+        }
+
+        match() {
             return ! document.hasFocus()
-                && (condition === 'unfocused' || condition === 'both')
         }
     }
 
     class ConditionScrollbarTop extends Condition {
-        match () {
-            let condition = this.addon.options.refreshConditionScrollbar.toLowerCase()
+        enabled() {
+            return this.addon.options.refreshConditionScrollbar.toLowerCase() === 'top'
+        }
+
+        match() {
             let position = (window.pageYOffset || document.documentElement.scrollTop)
 
-            return condition === 'top' && position === 0
+            return this.addon.isRefreshing() || position === 0
         }
     }
 
     class ConditionScrollbarAnywhere extends Condition {
-        match () {
-            let condition = this.addon.options.refreshConditionScrollbar.toLowerCase()
+        enabled() {
+            return this.addon.options.refreshConditionScrollbar.toLowerCase() === 'anywhere'
+        }
 
-            return condition === 'anywhere'
+        match() {
+            return true
         }
     }
 
