@@ -546,7 +546,6 @@
          * @return boolean
          */
         shouldRefreshFeed() {
-
             let frequency = this.addon.options.settingUpdatefrequency
 
             return this.tick % (frequency * (1 / this.tickrate)) === 0
@@ -563,6 +562,8 @@
             document.querySelector(this.addon.RefreshSelector).click()
 
             this.addon.log(`Refreshing at tick ${this.tick}.`)
+
+            setTimeout(() => this.addon.isRefreshing(false), 500)
         }
     }
 
@@ -618,7 +619,9 @@
         }
 
         match() {
-            return document.hasFocus()
+            let condition = this.addon.options.refreshConditionFocus.toLowerCase()
+
+            return document.hasFocus() || condition === 'both'
         }
     }
 
@@ -630,7 +633,9 @@
         }
 
         match() {
-            return ! document.hasFocus()
+            let condition = this.addon.options.refreshConditionFocus.toLowerCase()
+
+            return (! document.hasFocus()) || condition === 'both'
         }
     }
 
