@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#refresh-channel-search').checked = fallback(options.refreshChannelSearch, false)
         document.querySelector('#refresh-condition-focus').value = fallback(options.refreshConditionFocus, 'unfocused')
         document.querySelector('#refresh-condition-scrollbar').value = fallback(options.refreshConditionScrollbar, 'top')
-        document.querySelector('#refresh-user-mousemovement').checked = fallback(options.refreshConditionMouseMovement, true)
+        document.querySelector('#refresh-user-mousemovement').checked = fallback(options.refreshConditionMouseMovement, false)
     }, (error) => {
         // Handle errors...
     })

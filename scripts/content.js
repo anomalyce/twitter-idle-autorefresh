@@ -15,7 +15,7 @@
                 refreshChannelSearch: false,
                 refreshConditionFocus: 'unfocused',
                 refreshConditionScrollbar: 'top',
-                refreshConditionMouseMovement: true,
+                refreshConditionMouseMovement: false,
             }
         }
 
