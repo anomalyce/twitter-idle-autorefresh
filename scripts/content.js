@@ -34,26 +34,27 @@
             this.refreshing = false
             this.oldSceneryState = null
             this.scenery = this.resetScenery()
+            
+            let settings = browser.storage.sync.get(null)
 
-            this.twitterHasLoaded()
-                .then((data) => {
-                    let settings = browser.storage.sync.get(null)
+            settings.then((options) => {
+                addon.options = addon.getOptions(options)
 
-                    settings.then((options) => {
-                        addon.options = addon.getOptions(options)
-
+                addon.twitterHasLoaded()
+                    .then((data) => {
                         addon.createIndicator()
+
                         window.addEventListener('mousemove', (e) => { addon.monitorMouseMovement(addon, e) })
                         addon.log('Twitter has finished loading the initial feed.')
 
                         new TweetWatcher(addon)
-                    }, (error) => {
-                        addon.error('Unable to fetch add-on options.', true)
                     })
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            }, (error) => {
+                addon.error('Unable to fetch add-on options.', true)
+            })
         }
 
         /**
@@ -74,7 +75,7 @@
                         for (let i = 0; i < mutation.addedNodes.length; i++) {
                             let node = mutation.addedNodes[i]
 
-                            if (node.matches(this.addon.options.selectorFeed)) {
+                            if (node.matches(addon.options.selectorFeed)) {
                                 observer.disconnect()
                                 return resolve({ feed: node })
                             }
@@ -250,7 +251,7 @@
          * @return void
          */
         createIndicator() {
-            this.twitterLogo = document.querySelector(this.addon.options.selectorStatus).parentNode
+            this.twitterLogo = document.querySelector(this.options.selectorStatus).parentNode
 
             let indicator = this.twitterLogo.cloneNode('div')
             indicator.classList.add('twitter-idle-autorefresh-indicator')
