@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#refresh-condition-focus').value = fallback(options.refreshConditionFocus, 'unfocused')
         document.querySelector('#refresh-condition-scrollbar').value = fallback(options.refreshConditionScrollbar, 'top')
         document.querySelector('#refresh-user-mousemovement').checked = fallback(options.refreshConditionMouseMovement, false)
+
+        document.querySelector('#selector-feed').value = fallback(options.selectorFeed, 'main [data-testid=primaryColumn] section[role=region]')
+        document.querySelector('#selector-refresh').value = fallback(options.selectorRefresh, 'h1[role=heading] a[role=link] > div:first-child')
+        document.querySelector('#selector-status').value = fallback(options.selectorStatus, 'h1[role=heading] [href="/home"] svg')
     }, (error) => {
         // Handle errors...
     })
@@ -35,5 +39,9 @@ document.querySelector('form').addEventListener('submit', (e) => {
         refreshConditionFocus: document.querySelector('#refresh-condition-focus').value,
         refreshConditionScrollbar: document.querySelector('#refresh-condition-scrollbar').value,
         refreshConditionMouseMovement: document.querySelector('#refresh-user-mousemovement').checked,
+
+        selectorFeed: document.querySelector('#selector-feed').value,
+        selectorRefresh: document.querySelector('#selector-refresh').value,
+        selectorStatus: document.querySelector('#selector-status').value,
     })
 })

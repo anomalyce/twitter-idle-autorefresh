@@ -1,9 +1,6 @@
 (() => {
     class TwitterIdleAutoRefresh {
         get Manifest() { return browser.runtime.getManifest() }
-        get FeedSelector() { return 'main [data-testid=primaryColumn] section[role=region]' }
-        get RefreshSelector() { return 'h1[role=heading] a[role=button] > div:first-child' }
-        get StatusSelector() { return 'h1[role=heading] [href="/home"] svg' }
         get DefaultOptions() {
             return {
                 settingUpdatefrequency: 15,
@@ -16,6 +13,10 @@
                 refreshConditionFocus: 'unfocused',
                 refreshConditionScrollbar: 'top',
                 refreshConditionMouseMovement: false,
+
+                selectorFeed: 'main [data-testid=primaryColumn] section[role=region]',
+                selectorRefresh: 'h1[role=heading] a[role=link] > div:first-child',
+                selectorStatus: 'h1[role=heading] [href="/home"] svg',
             }
         }
 
@@ -73,7 +74,7 @@
                         for (let i = 0; i < mutation.addedNodes.length; i++) {
                             let node = mutation.addedNodes[i]
 
-                            if (node.matches(addon.FeedSelector)) {
+                            if (node.matches(this.addon.options.selectorFeed)) {
                                 observer.disconnect()
                                 return resolve({ feed: node })
                             }
@@ -249,7 +250,7 @@
          * @return void
          */
         createIndicator() {
-            this.twitterLogo = document.querySelector(this.StatusSelector).parentNode
+            this.twitterLogo = document.querySelector(this.addon.options.selectorStatus).parentNode
 
             let indicator = this.twitterLogo.cloneNode('div')
             indicator.classList.add('twitter-idle-autorefresh-indicator')
@@ -559,7 +560,7 @@
         refreshFeed() {
             this.addon.isRefreshing(true)
 
-            document.querySelector(this.addon.RefreshSelector).click()
+            document.querySelector(this.addon.options.selectorRefresh).click()
 
             this.addon.log(`Refreshing at tick ${this.tick}.`)
 

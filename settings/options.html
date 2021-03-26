@@ -10,9 +10,9 @@
         }
 
         .twitter-idle-autorefresh .main-fieldset {
-            box-shadow: 1px 1px 8px #ccc;
-            border: 1px solid #ddd;
+            margin-top: 20px;
             padding: 20px;
+            border: none;
         }
 
         .twitter-idle-autorefresh .main-fieldset > legend {
@@ -82,7 +82,7 @@
 
         .twitter-idle-autorefresh .description {
             font-style: italic;
-            font-size: 10px;
+            font-size: 12px;
             margin: 3px 0;
             color: #999;
         }
@@ -93,6 +93,19 @@
 
         .twitter-idle-autorefresh input[type="checkbox"] {
             display: inline-block;
+        }
+
+        .twitter-idle-autorefresh .selector-field {
+            margin-bottom: 10px;
+        }
+
+        .twitter-idle-autorefresh .selector-field input {
+            margin-top: 3px;
+            width: 100%;
+        }
+
+        .twitter-idle-autorefresh .abandoned {
+            text-decoration: line-through;
         }
     </style>
 </head>
@@ -151,16 +164,20 @@
                     <div>
                         <label class="browser-style disabled">
                             <input disabled="disabled" type="checkbox" id="refresh-channel-profile">
-                            User profiles <em>(Coming soon)</em>
+                            <span class="abandoned">User profiles</span>
                         </label>
                     </div>
 
                     <div>
                         <label class="browser-style disabled">
                             <input disabled="disabled" type="checkbox" id="refresh-channel-search">
-                            Search results <em>(Coming soon)</em>
+                            <span class="abandoned">Search results</span>
                         </label>
                     </div>
+
+                    <p class="description">
+                        <strong>Update!</strong> I've decided to scrap these planned channels as I've personally never needed them, but should someone really want it - feel free to create a <a href="https://github.com/anomalyce/twitter-idle-autorefresh/issues" target="_blank" class="external-link">GitHub issue</a> and I'll look into it! :-)
+                    </p>
                 </div>
                 
                 <h3>Conditions</h3>
@@ -188,6 +205,54 @@
                             <input type="checkbox" id="refresh-user-mousemovement">
                             Disable when the user moves the mouse over the window
                         </label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <br>
+
+            <fieldset class="browser-style sub-fieldset">
+                <legend class="browser-style">Selectors</legend>
+
+                <div class="selector-field">
+                    <label class="browser-style">
+                        Feed Selector
+                    </label>
+
+                    <p class="description">
+                        The extension awaits the existance of the following element before processing anything.
+                    </p>
+
+                    <div>
+                        <input type="text" placeholder="main [data-testid=primaryColumn] section[role=region]" id="selector-feed">
+                    </div>
+                </div>
+
+                <div class="selector-field">
+                    <label class="browser-style">
+                        Refresh Selector
+                    </label>
+
+                    <p class="description">
+                        The element that the extension should click on to fetch new tweets.
+                    </p>
+
+                    <div>
+                        <input type="text" placeholder="h1[role=heading] a[role=link] > div:first-child" id="selector-refresh">
+                    </div>
+                </div>
+
+                <div class="selector-field">
+                    <label class="browser-style">
+                        Status Selector
+                    </label>
+
+                    <p class="description">
+                        The Twitter logo element to replace when the extension is active.
+                    </p>
+
+                    <div>
+                        <input type="text" placeholder="h1[role=heading] [href='/home'] svg" id="selector-status">
                     </div>
                 </div>
             </fieldset>
