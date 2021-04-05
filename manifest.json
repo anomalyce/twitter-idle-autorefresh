@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Twitter Idle AutoRefresh",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "description": "Automatically loads new tweets as they appear on the Twitter home feed, so long as the page isn't focused.",
     "homepage_url": "https://github.com/anomalyce/twitter-idle-autorefresh",
     "developer": {

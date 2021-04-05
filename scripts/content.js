@@ -8,8 +8,9 @@
                 settingDebugLogs: false,
 
                 refreshChannelHome: true,
-                refreshChannelProfile: false,
-                refreshChannelSearch: false,
+                refreshChannelProfile: true,
+                refreshChannelSearch: true,
+                refreshChannelList: true,
                 refreshConditionFocus: 'unfocused',
                 refreshConditionScrollbar: 'top',
                 refreshConditionMouseMovement: false,
@@ -112,7 +113,7 @@
          */
         resetScenery() {
             this.oldSceneryState = this.scenery
-            this.scenery = { channel: null, conditions: [] }
+            this.scenery = { channel: null, conditions: [], refresher: null }
         }
 
         /**
@@ -123,6 +124,16 @@
          */
         setSceneryChannel(channel) {
             this.scenery.channel = channel
+        }
+
+        /**
+         * Set the scenery refresher.
+         *
+         * @param  string  refresher
+         * @return void
+         */
+        setSceneryRefresher(refresher) {
+            this.scenery.refresher = refresher
         }
 
         /**
@@ -142,6 +153,15 @@
          */
         getSceneryChannel() {
             return this.scenery.channel
+        }
+
+        /**
+         * Retrieve the current scenery refresher.
+         *
+         * @return string
+         */
+        getSceneryRefresher() {
+            return this.scenery.refresher
         }
 
         /**
@@ -328,7 +348,10 @@
     class TweetWatcher {
         get Channels() {
             return [
-                new ChannelHome /*, new ChannelProfile, new ChannelSearch, */
+                new ChannelHome,
+                new ChannelProfile,
+                new ChannelSearch,
+                new ChannelList,
             ]
         }
 
@@ -495,6 +518,7 @@
 
                 if (channel.enabled() && channel.match()) {
                     this.addon.setSceneryChannel(channel.constructor.name)
+                    this.addon.setSceneryRefresher(channel.refresh)
                     return true
                 }
             }
@@ -558,14 +582,19 @@
          *
          * @return void
          */
-        refreshFeed() {
+        async refreshFeed() {
             this.addon.isRefreshing(true)
 
-            document.querySelector(this.addon.options.selectorRefresh).click()
+            let channel = this.addon.getSceneryChannel()
+            let refresher = this.addon.getSceneryRefresher()
 
-            this.addon.log(`Refreshing at tick ${this.tick}.`)
+            this.addon.log(`Refreshing channel '${channel}' at tick ${this.tick}.`)
 
-            setTimeout(() => this.addon.isRefreshing(false), 500)
+            sleep(50).then(() => {
+                refresher(this.addon)
+
+                sleep(500).then(() => this.addon.isRefreshing(false))
+            })
         }
     }
 
@@ -591,6 +620,12 @@
 
             return path.match(/^\/home/)
         }
+
+        async refresh(addon) {
+            addon.log(`Refreshed 'ChannelHome'.`)
+
+            document.querySelector(addon.options.selectorRefresh).click()
+        }
     }
 
     class ChannelProfile extends Condition {
@@ -601,6 +636,16 @@
         match() {
             return document.title.match(/\(\@(.+)\)/)
         }
+
+        async refresh(addon) {
+            await sleep(500)
+            window.scrollTo(0, 1500)
+            
+            await sleep(50)
+            window.scrollTo(0, 0)
+
+            addon.log(`Refreshed 'ChannelProfile'.`)
+        }
     }
 
     class ChannelSearch extends Condition {
@@ -609,7 +654,37 @@
         }
 
         match() {
-            return document.title.match(/Twitter Search/i)
+            return window.location.pathname.match(/^\/search/i)
+        }
+
+        async refresh(addon) {
+            await sleep(500)
+            window.scrollTo(0, 500)
+            
+            await sleep(50)
+            window.scrollTo(0, 0)
+
+            addon.log(`Refreshed 'ChannelSearch'.`)
+        }
+    }
+
+    class ChannelList extends Condition {
+        enabled() {
+            return this.addon.options.refreshChannelList
+        }
+
+        match() {
+            return window.location.pathname.match(/^\/i\/lists\/(\d+)/i)
+        }
+
+        async refresh(addon) {
+            await sleep(500)
+            window.scrollTo(0, 500)
+            
+            await sleep(50)
+            window.scrollTo(0, 0)
+
+            addon.log(`Refreshed 'ChannelList'.`)
         }
     }
 
@@ -661,6 +736,10 @@
         match() {
             return true
         }
+    }
+
+    const sleep = (milliseconds) => {
+        return new Promise(resolve => setTimeout(resolve, milliseconds))
     }
 
     new TwitterIdleAutoRefresh()

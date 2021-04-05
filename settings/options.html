@@ -107,6 +107,10 @@
         .twitter-idle-autorefresh .abandoned {
             text-decoration: line-through;
         }
+
+        .twitter-idle-autorefresh .experimental {
+            color: maroon;
+        }
     </style>
 </head>
 <body>
@@ -162,22 +166,29 @@
                     </div>
 
                     <div>
-                        <label class="browser-style disabled">
-                            <input disabled="disabled" type="checkbox" id="refresh-channel-profile">
-                            <span class="abandoned">User profiles</span>
+                        <label class="browser-style">
+                            <input type="checkbox" id="refresh-channel-profile">
+                            User profiles <sup class="experimental">Experimental</sup>
                         </label>
                     </div>
 
                     <div>
-                        <label class="browser-style disabled">
-                            <input disabled="disabled" type="checkbox" id="refresh-channel-search">
-                            <span class="abandoned">Search results</span>
+                        <label class="browser-style">
+                            <input type="checkbox" id="refresh-channel-search">
+                            Search results <sup class="experimental">Experimental</sup>
                         </label>
                     </div>
 
-                    <p class="description">
-                        <strong>Update!</strong> I've decided to scrap these planned channels as I've personally never needed them, but should someone really want it - feel free to create a <a href="https://github.com/anomalyce/twitter-idle-autorefresh/issues" target="_blank" class="external-link">GitHub issue</a> and I'll look into it! :-)
-                    </p>
+                    <div>
+                        <label class="browser-style">
+                            <input type="checkbox" id="refresh-channel-list">
+                            Lists <sup class="experimental">Experimental</sup>
+                        </label>
+                    </div>
+
+                    <div class="description">
+                        <strong>Experimental</strong> &mdash; These channels were all requested, and until I can find a smoother way of loading new tweets under these channels, you'll have to settle for a choppy forced-scrolling method. It's not perfect, but it should be better than manually refreshing the page :-)
+                    </div>
                 </div>
                 
                 <h3>Conditions</h3>
