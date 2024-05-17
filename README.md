@@ -9,7 +9,7 @@ PSS. Should you change the Twitter design in their Display settings, it is recom
 
 > Please read!
 >
-> As a privacy proponent myself, I would like to briefly state that this add-on will **NEVER** record any data whatsoever (e.g. browsing habits). It does however require the `storage` permission in order to save &amp; read its user settings. It will also only activate on URLs matching `*://twitter.com/*`.
+> As a privacy proponent myself, I would like to briefly state that this add-on will **NEVER** record any data whatsoever (e.g. browsing habits). It does however require the `storage` permission in order to save &amp; read its user settings. It will also only activate on URLs matching `*://twitter.com/*` and `*://x.com/*`.
 >
 > The add-on is freely available on [GitHub](https://github.com/anomalyce/twitter-idle-autorefresh) for full transparency.
 
