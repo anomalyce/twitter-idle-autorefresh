@@ -11,6 +11,7 @@
                 refreshChannelProfile: true,
                 refreshChannelSearch: true,
                 refreshChannelList: true,
+                refreshChannelNotifications: true,
                 refreshConditionFocus: 'unfocused',
                 refreshConditionScrollbar: 'top',
                 refreshConditionMouseMovement: false,
@@ -352,6 +353,7 @@
                 new ChannelProfile,
                 new ChannelSearch,
                 new ChannelList,
+                new ChannelNotifications,
             ]
         }
 
@@ -685,6 +687,26 @@
             window.scrollTo(0, 0)
 
             addon.log(`Refreshed 'ChannelList'.`)
+        }
+    }
+
+    class ChannelNotifications extends Condition {
+        enabled() {
+            return this.addon.options.refreshChannelNotifications
+        }
+
+        match() {
+            return window.location.pathname.match(/^\/notifications/i)
+        }
+
+        async refresh(addon) {
+            await sleep(500)
+            window.scrollTo(0, 500)
+            
+            await sleep(50)
+            window.scrollTo(0, 0)
+
+            addon.log(`Refreshed 'ChannelNotifications'.`)
         }
     }
 

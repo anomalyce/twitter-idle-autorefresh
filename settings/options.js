@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#refresh-channel-profile').checked = fallback(options.refreshChannelProfile, true)
         document.querySelector('#refresh-channel-search').checked = fallback(options.refreshChannelSearch, true)
         document.querySelector('#refresh-channel-list').checked = fallback(options.refreshChannelList, true)
+        document.querySelector('#refresh-channel-notifications').checked = fallback(options.refreshChannelNotifications, true)
         document.querySelector('#refresh-condition-focus').value = fallback(options.refreshConditionFocus, 'unfocused')
         document.querySelector('#refresh-condition-scrollbar').value = fallback(options.refreshConditionScrollbar, 'top')
         document.querySelector('#refresh-user-mousemovement').checked = fallback(options.refreshConditionMouseMovement, false)
@@ -38,6 +39,7 @@ document.querySelector('form').addEventListener('submit', (e) => {
         refreshChannelProfile: document.querySelector('#refresh-channel-profile').checked,
         refreshChannelSearch: document.querySelector('#refresh-channel-search').checked,
         refreshChannelList: document.querySelector('#refresh-channel-list').checked,
+        refreshChannelNotifications: document.querySelector('#refresh-channel-notifications').checked,
         refreshConditionFocus: document.querySelector('#refresh-condition-focus').value,
         refreshConditionScrollbar: document.querySelector('#refresh-condition-scrollbar').value,
         refreshConditionMouseMovement: document.querySelector('#refresh-user-mousemovement').checked,
