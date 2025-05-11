@@ -697,6 +697,7 @@
 
         match() {
             return window.location.pathname.match(/^\/notifications/i)
+                || window.location.pathname.match(/^\/i\/timeline/i)
         }
 
         async refresh(addon) {
